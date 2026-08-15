@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=AyeAye
+Comment=Screen recorder and GIF editor
+Comment[pt_BR]=Gravador de tela e editor de GIFs
+Exec=ayeaye
+Icon=io.github.rafaelign.AyeAye
+Terminal=false
+Categories=AudioVideo;Recorder;Graphics;
+Keywords=screen;record;gif;capture;screenshot;
+StartupWMClass=ayeaye

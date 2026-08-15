@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.rafaelign.AyeAye</id>
+  <name>AyeAye</name>
+  <summary>Screen recorder and GIF editor for Linux</summary>
+  <summary xml:lang="pt-BR">Gravador de tela e editor de GIFs para Linux</summary>
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT</project_license>
+
+  <description>
+    <p>
+      AyeAye records a region of the screen, lets you edit the frames
+      (delete, reorder, crop, blur, annotate with text), and exports a GIF.
+      Written in Rust for Linux/X11. An independent, open source rewrite
+      inspired by ScreenToGif.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">io.github.rafaelign.AyeAye.desktop</launchable>
+
+  <url type="homepage">https://github.com/rafaelign/ayeaye</url>
+  <url type="bugtracker">https://github.com/rafaelign/ayeaye/issues</url>
+
+  <categories>
+    <category>AudioVideo</category>
+    <category>Recorder</category>
+    <category>Graphics</category>
+  </categories>
+
+  <!--
+    Preencher antes de publicar em uma loja de apps (Flathub etc.):
+    - <screenshots> com pelo menos 1 imagem do editor em uso
+    - <releases> com o changelog de cada versão publicada
+    - content_rating (oars-1.1), geralmente "none" para apps sem conteúdo sensível
+  -->
+</component>
