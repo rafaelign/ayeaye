@@ -1,48 +1,73 @@
-# AyeAye (Rust, Linux/X11)
+<p align="center">
+  <img src="docs/assets/logo.png" alt="AyeAye logo" width="120" />
+</p>
 
-Grava uma região da tela, permite editar os frames (excluir, reordenar, cortar, borrar, anotar com texto) e exporta um GIF. O nome é uma referência ao aye-aye, um lêmure noturno de Madagascar.
+<h1 align="center">AyeAye</h1>
+<p align="center">Screen recorder + GIF editor for Linux (X11), written in Rust.</p>
 
-## Requisitos
+<p align="center">
+  <a href="README.pt-BR.md">Português (Brasil)</a> ·
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License"></a>
+  <img src="https://img.shields.io/badge/rust-stable-orange.svg" alt="Rust stable">
+  <img src="https://img.shields.io/badge/platform-Linux%20(X11)-lightgrey.svg" alt="Linux X11">
+</p>
 
-- Linux com sessão X11 (rode `echo $XDG_SESSION_TYPE` para confirmar — deve imprimir `x11`).
-- Rust estável (`rustup show` para conferir).
+Records a region of the screen, lets you edit the frames (delete, reorder, crop, blur, annotate with text), and exports a GIF. The name is a reference to the aye-aye, a nocturnal lemur from Madagascar.
+
+> [!NOTE]
+> Inspired by [ScreenToGif](https://github.com/NickeManarin/ScreenToGif) — this project is an independent rewrite in Rust, focused on Linux/X11, with no affiliation to the original project.
+
+## Requirements
+
+- Linux with an X11 session (run `echo $XDG_SESSION_TYPE` to confirm — it should print `x11`).
+- Stable Rust (`rustup show` to check).
 
 ## Build
 
-    cargo build --workspace
+```bash
+cargo build --workspace
+```
 
-## Rodar
+## Run
 
-    cargo run -p app
+```bash
+cargo run -p app
+```
 
-## Fluxo de uso
+## Usage flow
 
-1. Na tela "Gravar tela", escolha o FPS (8/12/15/20) e clique em **Tela Inteira** ou **Selecionar Área**.
-   - **Tela Inteira**: grava o monitor onde a janela do app está.
-   - **Selecionar Área**: a tela escurece — arraste um retângulo sobre a região desejada; ao soltar, a gravação começa.
-2. Durante a gravação, um indicador flutuante mostra `● REC · MM:SS · N frames`. Clique no botão de parar do indicador, ou pressione **F9**, a qualquer momento.
-3. A janela principal volta ao primeiro plano com uma tela de carregamento ("Processando gravação...") enquanto as miniaturas são preparadas em segundo plano, e então mostra o editor.
-4. No editor: a miniatura selecionada aparece grande à esquerda; a filmstrip embaixo lista todos os frames (clique para selecionar). No painel à direita, escolha a ferramenta:
-   - **Selecionar**: Duplicar, mover (◀/▶), excluir o frame atual.
-   - **Recortar**: arraste sobre o preview para cortar todos os frames.
-   - **Blur**: ajuste a intensidade, arraste sobre o preview para borrar uma região em todos os frames.
-   - **Texto**: digite o texto, clique no preview para posicioná-lo em todos os frames.
-   - **▷ Prévia** reproduz os frames em loop no preview.
-5. Clique em **Exportar**, escolha onde salvar. O editor continua visível (desabilitado) com um indicador de progresso sobreposto; ele libera automaticamente e mostra "Salvo em: ..." quando terminar. "← Nova gravação" descarta a sessão atual e volta à tela inicial.
+1. On the "Record screen" screen, choose the FPS (8/12/15/20) and click **Full Screen** or **Select Area**.
+   - **Full Screen**: records the monitor where the app window is located.
+   - **Select Area**: the screen dims — drag a rectangle over the desired region; recording starts once you release.
+2. During recording, a floating indicator shows `● REC · MM:SS · N frames`. Click the stop button on the indicator, or press **F9**, at any time.
+3. The main window comes back to the foreground with a loading screen ("Processing recording...") while thumbnails are prepared in the background, then shows the editor.
+4. In the editor: the selected thumbnail appears large on the left; the filmstrip below lists all frames (click to select). In the right panel, choose a tool:
+   - **Select**: Duplicate, move (◀/▶), delete the current frame.
+   - **Crop**: drag over the preview to crop all frames.
+   - **Blur**: adjust intensity, drag over the preview to blur a region across all frames.
+   - **Text**: type the text, click the preview to position it across all frames.
+   - **▷ Preview** plays the frames in a loop in the preview.
+5. Click **Export**, choose where to save. The editor remains visible (disabled) with an overlaid progress indicator; it releases automatically and shows "Saved to: ..." when done. "← New recording" discards the current session and returns to the initial screen.
 
-## Escopo desta versão
+## Scope of this version
 
-Ver `docs/superpowers/specs/2026-08-12-screentogif-rust-linux-design.md` (MVP original) e `docs/superpowers/specs/2026-08-13-screentogif-capture-editor-redesign-design.md` (fluxo de captura e editor atuais) para o design completo. Fora de escopo por enquanto: Wayland, webcam, modo board, edição de atraso por frame, reordenar por arrastar-e-soltar na filmstrip, escolher uma janela específica para gravar, exportação para vídeo/APNG/PSD, salvar/carregar projeto.
+See `docs/superpowers/specs/2026-08-12-screentogif-rust-linux-design.md` (original MVP) and `docs/superpowers/specs/2026-08-13-screentogif-capture-editor-redesign-design.md` (current capture and editor flow) for the full design. Out of scope for now: Wayland, webcam, board mode, per-frame delay editing, drag-and-drop reordering in the filmstrip, choosing a specific window to record, export to video/APNG/PSD, save/load project.
 
-## Testes automatizados
+## Automated tests
 
-    cargo test --workspace
+```bash
+cargo test --workspace
+```
 
-`capture` e as partes de janela/viewport do `app` (overlay de seleção, indicador de gravação, esconder/focar a janela principal) não têm testes automatizados — dependem de um display X11 real. Use o checklist manual abaixo para verificá-las; veja também `crates/capture/examples/manual_capture.rs`.
+> [!IMPORTANT]
+> `capture` and the window/viewport parts of `app` (selection overlay, recording indicator, hiding/focusing the main window) don't have automated tests — they depend on a real X11 display. Use the manual checklist below to verify them; see also `crates/capture/examples/manual_capture.rs`.
 
-## Checklist manual end-to-end
+<details>
+<summary><strong>Manual end-to-end checklist</strong></summary>
 
-1. Tela Inteira: grava, indicador aparece e conta corretamente, F9 para, editor mostra o resultado com a janela principal em primeiro plano.
-2. Selecionar Área: overlay cobre a tela, arrasto mostra o retângulo em tempo real, gravação começa só na área escolhida.
-3. No editor: exercite Selecionar (duplicar/mover/excluir), Recortar, Blur, Texto e Prévia, nessa ordem, sobre a mesma gravação.
-4. Exportar e abrir o GIF resultante — confirme que ele reflete todas as edições (frame duplicado, corte, blur, texto, ordem).
+- [ ] Full Screen: record, indicator appears and counts correctly, F9 stops it, editor shows the result with the main window in the foreground.
+- [ ] Select Area: overlay covers the screen, dragging shows the rectangle in real time, recording starts only in the chosen area.
+- [ ] In the editor: exercise Select (duplicate/move/delete), Crop, Blur, Text, and Preview, in that order, on the same recording.
+- [ ] Export and open the resulting GIF — confirm it reflects all edits (duplicated frame, crop, blur, text, order).
+
+</details>
