@@ -26,6 +26,7 @@ use global_hotkey::{
 };
 use processing::{start_edit_processing, start_initial_processing, EditOp, ProcessingJob};
 use project_screen::{ProjectAction, ProjectScreen};
+use strings::{Lang, Strings};
 
 enum AppState {
     Project(ProjectScreen),
@@ -119,6 +120,10 @@ struct App {
     /// shown in the UI (project screen header, editor top bar) — cheap to
     /// clone, since `TextureHandle` is just a ref-counted handle.
     logo: egui::TextureHandle,
+    /// Detected once at startup from the OS locale; the top bar's toggle
+    /// can change it for the rest of the session. Never persisted — the
+    /// next launch always re-detects.
+    lang: Lang,
 }
 
 impl App {
@@ -139,6 +144,7 @@ impl App {
             state: AppState::Project(ProjectScreen::default()),
             last_error: None,
             logo,
+            lang: Lang::detect(),
         }
     }
 }
@@ -205,6 +211,24 @@ impl eframe::App for App {
         let mut should_return_to_project = false;
         let mut should_process_edit: Option<EditOp> = None;
         let logo = self.logo.clone();
+        let strings = self.lang.strings();
+
+        // Claimed first, so every screen below gets the remaining space —
+        // same "claim panels before the content that fills what's left"
+        // pattern the editor screen already uses for its own bars. Not
+        // shown on the selection-overlay or recording-indicator viewports
+        // — those are separate, transient windows this function doesn't
+        // touch at all.
+        egui::Panel::top("app_top_bar").exact_size(28.0).show(ui, |ui| {
+            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                if ui.selectable_label(self.lang == Lang::PtBr, "PT-BR").clicked() {
+                    self.lang = Lang::PtBr;
+                }
+                if ui.selectable_label(self.lang == Lang::En, "EN").clicked() {
+                    self.lang = Lang::En;
+                }
+            });
+        });
 
         egui::CentralPanel::default().show(ui, |ui| match &mut self.state {
             AppState::Project(screen) => match screen.show(ui, &logo) {
@@ -458,9 +482,10 @@ fn main() -> eframe::Result<()> {
             .with_resizable(true)
             .with_transparent(false)
             // 30% larger than the original 480x420 default, plus extra
-            // height for the project screen's donation footer so it
-            // doesn't overlap the "Tela Inteira"/"Selecionar Área" buttons.
-            .with_inner_size([624.0, 596.0])
+            // height for the project screen's donation footer and the
+            // app-wide language-toggle top bar, so neither overlaps the
+            // "Tela Inteira"/"Selecionar Área" buttons.
+            .with_inner_size([624.0, 624.0])
             .with_icon(load_icon_data()),
         renderer: eframe::Renderer::Glow,
         ..Default::default()
