@@ -10,6 +10,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License"></a>
   <img src="https://img.shields.io/badge/rust-stable-orange.svg" alt="Rust stable">
   <img src="https://img.shields.io/badge/platform-Linux%20(X11%2FWayland)-lightgrey.svg" alt="Linux X11/Wayland">
+  <a href="https://ko-fi.com/H2H010PKL5"><img src="https://storage.ko-fi.com/cdn/kofi3.png?v=3" alt="Support me on Ko-fi" height="20"></a>
 </p>
 
 Records a region of the screen, lets you edit the frames (delete, reorder, crop, blur, annotate with text), and exports a GIF. The name is a reference to the aye-aye, a nocturnal lemur from Madagascar.

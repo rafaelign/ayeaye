@@ -10,6 +10,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="Licença MIT"></a>
   <img src="https://img.shields.io/badge/rust-stable-orange.svg" alt="Rust stable">
   <img src="https://img.shields.io/badge/platform-Linux%20(X11%2FWayland)-lightgrey.svg" alt="Linux X11/Wayland">
+  <a href="https://ko-fi.com/H2H010PKL5"><img src="https://storage.ko-fi.com/cdn/kofi3.png?v=3" alt="Apoie no Ko-fi" height="20"></a>
 </p>
 
 Grava uma região da tela, permite editar os frames (excluir, reordenar, cortar, borrar, anotar com texto) e exporta um GIF. O nome é uma referência ao aye-aye, um lêmure noturno de Madagascar.

@@ -27,6 +27,25 @@ impl ProjectScreen {
     pub fn show(&mut self, ui: &mut egui::Ui, logo: &egui::TextureHandle) -> Option<ProjectAction> {
         let mut action = None;
 
+        // Claimed first, like the editor's own status bar, so the
+        // centered content above sizes itself against the space that's
+        // actually left over instead of overlapping this footer.
+        egui::Panel::bottom("project_footer").exact_size(24.0).show(ui, |ui| {
+            ui.vertical_centered(|ui| {
+                ui.add_space(4.0);
+                // `Hyperlink`/`hyperlink_to` always paint with
+                // `visuals().hyperlink_color` — an explicit `.color()` on
+                // the RichText itself is ignored — so the only way to keep
+                // this link visually quiet (not the same bright accent as
+                // every other link in the app) is to override the color
+                // for just this one widget via a scoped style.
+                ui.scope(|ui| {
+                    ui.visuals_mut().hyperlink_color = ui.visuals().weak_text_color();
+                    ui.hyperlink_to(egui::RichText::new("Apoie o projeto no Ko-fi").size(12.0), "https://ko-fi.com/H2H010PKL5");
+                });
+            });
+        });
+
         // The placeholder box scales with the window (65% of the available
         // width, within sane bounds) and keeps a 16:9 aspect ratio, and the
         // heading grows with it too — so the screen actually fills a large
