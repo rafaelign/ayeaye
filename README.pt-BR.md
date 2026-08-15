@@ -30,8 +30,12 @@ Grava uma região da tela, permite editar os frames (excluir, reordenar, cortar,
 
 ## Requisitos
 
-- Linux com sessão X11 (rode `echo $XDG_SESSION_TYPE` para confirmar — deve imprimir `x11`).
+- Linux com sessão X11 ou Wayland (rode `echo $XDG_SESSION_TYPE` para saber qual).
 - Rust estável (`rustup show` para conferir).
+- `libpipewire-0.3-dev` e `clang` instalados — necessários para compilar (o suporte a Wayland da `xcap` traz bindings do PipeWire incondicionalmente no Linux, mesmo rodando no X11).
+
+> [!NOTE]
+> No Wayland, iniciar uma gravação abre o seletor de compartilhamento de tela do sistema (escolher um monitor, clicar em Compartilhar) — isso é uma barreira de segurança do portal `ScreenCast` do Wayland, não algo que o AyeAye pode pular. O atalho **F9** para parar só funciona no X11; no Wayland, use o botão "Parar" no indicador flutuante de gravação. "Selecionar Área" no Wayland fica limitada ao monitor onde a janela do app está.
 
 ## Build
 
@@ -80,5 +84,11 @@ cargo test --workspace
 - [ ] Selecionar Área: overlay cobre a tela, arrasto mostra o retângulo em tempo real, gravação começa só na área escolhida.
 - [ ] No editor: exercite Selecionar (duplicar/mover/excluir), Recortar, Blur, Texto e Prévia, nessa ordem, sobre a mesma gravação.
 - [ ] Exportar e abrir o GIF resultante — confirme que ele reflete todas as edições (frame duplicado, corte, blur, texto, ordem).
+
+**No Wayland** (rode numa sessão onde `echo $XDG_SESSION_TYPE` imprime `wayland`):
+
+- [ ] Tela Inteira: grave, confirme que o seletor de compartilhamento do sistema aparece e a gravação só começa depois de escolher um monitor e compartilhar, o indicador aparece e conta corretamente, o botão "Parar" no indicador para a gravação (o F9 não deve fazer nada), o editor mostra o resultado.
+- [ ] Selecionar Área: o overlay fica em tela cheia no monitor onde a janela do app está, o arrasto mostra o retângulo em tempo real, os frames exportados/editados cobrem só a região arrastada (não o monitor inteiro).
+- [ ] A gravação em cada FPS (8/12/15/20) bate aproximadamente com a contagem de frames esperada pela duração da gravação (com alguma folga — o throttle descarta frames, não garante uma contagem exata).
 
 </details>

@@ -30,8 +30,12 @@ Records a region of the screen, lets you edit the frames (delete, reorder, crop,
 
 ## Requirements
 
-- Linux with an X11 session (run `echo $XDG_SESSION_TYPE` to confirm — it should print `x11`).
+- Linux with an X11 or Wayland session (run `echo $XDG_SESSION_TYPE` to check which one).
 - Stable Rust (`rustup show` to check).
+- `libpipewire-0.3-dev` and `clang` installed — needed to build (`xcap`'s Wayland support pulls in PipeWire bindings unconditionally on Linux, even if you end up running on X11).
+
+> [!NOTE]
+> On Wayland, starting a recording opens the OS's screen-sharing picker (pick a monitor, click Share) — this is a security boundary of the Wayland `ScreenCast` portal, not something AyeAye can skip. The **F9** stop shortcut only works on X11; on Wayland, use the "Parar" button on the floating recording indicator. "Selecionar Área" on Wayland is limited to the monitor the app window is on.
 
 ## Build
 
@@ -80,5 +84,11 @@ cargo test --workspace
 - [ ] Select Area: overlay covers the screen, dragging shows the rectangle in real time, recording starts only in the chosen area.
 - [ ] In the editor: exercise Select (duplicate/move/delete), Crop, Blur, Text, and Preview, in that order, on the same recording.
 - [ ] Export and open the resulting GIF — confirm it reflects all edits (duplicated frame, crop, blur, text, order).
+
+**On Wayland** (run under a session where `echo $XDG_SESSION_TYPE` prints `wayland`):
+
+- [ ] Full Screen: record, confirm the OS screen-sharing picker appears and recording only starts after picking a monitor and sharing, indicator appears and counts correctly, the "Parar" button on the indicator stops it (F9 is expected to do nothing), editor shows the result.
+- [ ] Select Area: overlay fullscreens on the monitor the app window is on, dragging shows the rectangle in real time, the exported/edited frames only cover the dragged region (not the whole monitor).
+- [ ] Recording at each FPS preset (8/12/15/20) roughly matches the expected frame count for the recording's duration (allow some slack — the throttle drops frames, it doesn't guarantee an exact count).
 
 </details>
