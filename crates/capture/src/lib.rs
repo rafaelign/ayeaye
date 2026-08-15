@@ -55,6 +55,19 @@ pub fn session_type() -> SessionType {
     session_type_from_env(std::env::var("XDG_SESSION_TYPE").ok().as_deref())
 }
 
+/// FPS throttle for the Wayland capture loop: PipeWire delivers frames at
+/// whatever rate the compositor negotiates (commonly close to display
+/// refresh rate), so instead of polling at a fixed interval like the X11
+/// loop does, each incoming frame is checked against how long it's been
+/// since the last frame we kept. `last_accepted` is `None` for the very
+/// first frame, which is always accepted.
+fn should_accept(last_accepted: Option<Instant>, now: Instant, interval: Duration) -> bool {
+    match last_accepted {
+        None => true,
+        Some(last) => now.duration_since(last) >= interval,
+    }
+}
+
 /// Spawns a background thread that repeatedly captures `region` at roughly
 /// `fps` frames per second, sending each captured frame on `tx`, until
 /// `stop_flag` is set to `true`. Frames already sent before a capture
@@ -216,5 +229,37 @@ mod tests {
     #[test]
     fn session_type_from_env_unknown_value_defaults_to_x11() {
         assert_eq!(session_type_from_env(Some("mir")), SessionType::X11);
+    }
+
+    #[test]
+    fn should_accept_the_first_frame_unconditionally() {
+        let now = Instant::now();
+        assert!(should_accept(None, now, Duration::from_millis(100)));
+    }
+
+    #[test]
+    fn should_accept_rejects_a_frame_arriving_before_the_interval_elapsed() {
+        let last = Instant::now();
+        let now = last + Duration::from_millis(50);
+        assert!(!should_accept(Some(last), now, Duration::from_millis(100)));
+    }
+
+    #[test]
+    fn should_accept_accepts_a_frame_arriving_after_the_interval_elapsed() {
+        let last = Instant::now();
+        let now = last + Duration::from_millis(150);
+        assert!(should_accept(Some(last), now, Duration::from_millis(100)));
+    }
+
+    #[test]
+    fn should_accept_does_not_burst_catch_up_after_a_long_gap() {
+        let interval = Duration::from_millis(100);
+        let last = Instant::now();
+        let accepted_at = last + Duration::from_millis(500);
+        assert!(should_accept(Some(last), accepted_at, interval));
+        // Once a frame is accepted, `last_accepted` moves to that frame's
+        // time — a frame arriving immediately after is correctly rejected,
+        // rather than the gate "catching up" on the gap that preceded it.
+        assert!(!should_accept(Some(accepted_at), accepted_at + Duration::from_millis(10), interval));
     }
 }
