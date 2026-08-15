@@ -30,6 +30,7 @@ enum AppState {
     Project(ProjectScreen),
     SelectingArea {
         fps: u32,
+        bounds: capture::Region,
         backdrop: Vec<(capture::Region, egui::TextureHandle)>,
         drag_start: Option<(f32, f32)>,
     },
@@ -209,11 +210,29 @@ impl eframe::App for App {
                 Some(ProjectAction::StartFullScreen) => should_start_full_screen = true,
                 Some(ProjectAction::StartAreaSelection) => {
                     let fps = screen.fps;
+                    // On Wayland the overlay can only cover one monitor (see
+                    // `selection_overlay::show`) — the one the app window is
+                    // on, same restriction "Tela Inteira" already has. On
+                    // X11 it still spans every monitor, as before.
+                    let (bounds, snapshots): (capture::Region, Vec<(capture::Region, image::RgbaImage)>) =
+                        if capture::session_type() == capture::SessionType::Wayland {
+                            let window_center = ctx
+                                .input(|i| i.viewport().inner_rect)
+                                .expect("window position is unavailable on this platform")
+                                .center();
+                            let bounds = capture::monitor_bounds_at(window_center.x as i32, window_center.y as i32)
+                                .expect("could not determine the monitor under the app window");
+                            let image = capture::snapshot_monitor(bounds).expect("could not capture a desktop snapshot");
+                            (bounds, vec![(bounds, image)])
+                        } else {
+                            let bounds = capture::virtual_screen_bounds().expect("could not enumerate monitors");
+                            let snapshots = capture::snapshot_monitors().expect("could not capture a desktop snapshot");
+                            (bounds, snapshots)
+                        };
                     // Captured once, up front — used as the overlay's real
                     // backdrop instead of relying on window transparency,
                     // which isn't reliably honored by every window manager.
-                    let backdrop = capture::snapshot_monitors()
-                        .expect("could not capture a desktop snapshot")
+                    let backdrop = snapshots
                         .into_iter()
                         .enumerate()
                         .map(|(i, (region, image))| {
@@ -226,13 +245,13 @@ impl eframe::App for App {
                             (region, texture)
                         })
                         .collect();
-                    self.state = AppState::SelectingArea { fps, backdrop, drag_start: None };
+                    self.state = AppState::SelectingArea { fps, bounds, backdrop, drag_start: None };
                 }
                 None => {}
             },
-            AppState::SelectingArea { fps, backdrop, drag_start } => {
-                let bounds = capture::virtual_screen_bounds().expect("could not enumerate monitors");
-                if let Some(region) = selection_overlay::show(&ctx, bounds, backdrop, drag_start) {
+            AppState::SelectingArea { fps, bounds, backdrop, drag_start } => {
+                let fullscreen = capture::session_type() == capture::SessionType::Wayland;
+                if let Some(region) = selection_overlay::show(&ctx, *bounds, fullscreen, backdrop, drag_start) {
                     should_start_region_recording = Some((region, *fps));
                 }
             }

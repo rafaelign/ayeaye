@@ -47,35 +47,44 @@ mod tests {
 
 use eframe::egui;
 
-/// Renders the full-desktop selection overlay as its own viewport,
-/// spanning `bounds` (the union of every monitor, in desktop coordinates —
-/// see `capture::virtual_screen_bounds`). `drag_start` is owned by the
-/// caller (`AppState::SelectingArea`) so it survives across frames, the
-/// same pattern `crop_tool`'s callers use. Returns the selected region
-/// once the user releases a non-degenerate drag; the caller stops calling
-/// this function once that happens, which closes the overlay.
+/// Renders the selection overlay as its own viewport. On X11, `bounds` is
+/// the union of every monitor (see `capture::virtual_screen_bounds`) and
+/// the viewport is positioned at its exact desktop coordinates — Wayland
+/// doesn't let a client position its own window, so there `fullscreen` is
+/// `true` and `bounds` is just the one monitor the app window is on (see
+/// `capture::monitor_bounds_at`); the viewport goes fullscreen on whatever
+/// output the compositor puts it on instead of being explicitly placed.
+/// `drag_start` is owned by the caller (`AppState::SelectingArea`) so it
+/// survives across frames, the same pattern `crop_tool`'s callers use.
+/// Returns the selected region once the user releases a non-degenerate
+/// drag; the caller stops calling this function once that happens, which
+/// closes the overlay.
 ///
-/// `backdrop` is a real screenshot of every monitor (captured once, via
-/// `capture::snapshot_monitors`, when entering `SelectingArea`), drawn
+/// `backdrop` is a real screenshot of the monitor(s) `bounds` covers
+/// (captured once, via `capture::snapshot_monitors` or
+/// `capture::snapshot_monitor`, when entering `SelectingArea`), drawn
 /// behind the dimming so the user can always see the actual desktop —
 /// this doesn't depend on the window manager honoring the viewport's
 /// `with_transparent(true)`, which isn't reliably the case on every setup.
 pub fn show(
     ctx: &egui::Context,
     bounds: capture::Region,
+    fullscreen: bool,
     backdrop: &[(capture::Region, egui::TextureHandle)],
     drag_start: &mut Option<(f32, f32)>,
 ) -> Option<capture::Region> {
     let mut result = None;
     let viewport_id = egui::ViewportId::from_hash_of("selection_overlay");
+    let viewport_builder = egui::ViewportBuilder::default()
+        .with_decorations(false)
+        .with_transparent(true)
+        .with_resizable(false)
+        .with_inner_size([bounds.width as f32, bounds.height as f32]);
+    let viewport_builder =
+        if fullscreen { viewport_builder.with_fullscreen(true) } else { viewport_builder.with_position([bounds.x as f32, bounds.y as f32]) };
     ctx.show_viewport_immediate(
         viewport_id,
-        egui::ViewportBuilder::default()
-            .with_decorations(false)
-            .with_transparent(true)
-            .with_resizable(false)
-            .with_inner_size([bounds.width as f32, bounds.height as f32])
-            .with_position([bounds.x as f32, bounds.y as f32]),
+        viewport_builder,
         |ui, _class| {
             let response = ui.allocate_response(ui.available_size(), egui::Sense::drag());
 
