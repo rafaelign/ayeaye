@@ -1,0 +1,14 @@
+[package]
+name = "encoder"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+editor = { version = "0.1.0", path = "../editor" }
+gifski = { version = "1.34.0", default-features = false }
+imgref = "1.12.2"
+rgb = "0.8.53"
+
+[dev-dependencies]
+gif = "0.14.2"
+image = "0.25.10"
