@@ -306,9 +306,9 @@ impl eframe::App for App {
             }
             AppState::Recording { frames, started_at, .. } => {
                 ui.centered_and_justified(|ui| {
-                    ui.label("Gravando...");
+                    ui.label(strings.recording_label);
                 });
-                if recording_indicator::show(&ctx, started_at.elapsed().as_secs(), frames.len()) {
+                if recording_indicator::show(&ctx, started_at.elapsed().as_secs(), frames.len(), strings) {
                     should_stop_recording = true;
                 }
             }
