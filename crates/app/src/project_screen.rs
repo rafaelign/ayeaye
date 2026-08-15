@@ -1,5 +1,6 @@
 use eframe::egui;
 
+use crate::strings::Strings;
 use crate::theme;
 
 pub enum ProjectAction {
@@ -24,7 +25,7 @@ impl Default for ProjectScreen {
 impl ProjectScreen {
     const FPS_PRESETS: [u32; 4] = [8, 12, 15, 20];
 
-    pub fn show(&mut self, ui: &mut egui::Ui, logo: &egui::TextureHandle) -> Option<ProjectAction> {
+    pub fn show(&mut self, ui: &mut egui::Ui, logo: &egui::TextureHandle, strings: &Strings) -> Option<ProjectAction> {
         let mut action = None;
 
         // Claimed first, like the editor's own status bar, so the
@@ -41,7 +42,7 @@ impl ProjectScreen {
                 // for just this one widget via a scoped style.
                 ui.scope(|ui| {
                     ui.visuals_mut().hyperlink_color = ui.visuals().weak_text_color();
-                    ui.hyperlink_to(egui::RichText::new("Apoie o projeto no Ko-fi").size(12.0), "https://ko-fi.com/H2H010PKL5");
+                    ui.hyperlink_to(egui::RichText::new(strings.donation_link).size(12.0), "https://ko-fi.com/H2H010PKL5");
                 });
             });
         });
@@ -70,8 +71,8 @@ impl ProjectScreen {
             ui.add_space(2.0);
             ui.label(egui::RichText::new("AyeAye").size(name_size).strong().color(theme::ACCENT));
             ui.add_space(12.0);
-            ui.label(egui::RichText::new("Gravar tela").size(heading_size).color(ui.visuals().text_color()));
-            ui.label("Escolha a taxa de quadros e grave sua tela ou uma área selecionada.");
+            ui.label(egui::RichText::new(strings.record_screen_heading).size(heading_size).color(ui.visuals().text_color()));
+            ui.label(strings.record_screen_subtitle);
             ui.add_space(16.0);
 
             let (rect, _) = ui.allocate_exact_size(egui::vec2(box_width, box_height), egui::Sense::hover());
@@ -79,7 +80,7 @@ impl ProjectScreen {
             ui.painter().text(
                 rect.center(),
                 egui::Align2::CENTER_CENTER,
-                "Pronto para gravar",
+                strings.ready_to_record,
                 egui::FontId::proportional((heading_size / 1.8).max(14.0)),
                 egui::Color32::GRAY,
             );
@@ -114,10 +115,10 @@ impl ProjectScreen {
             ui.horizontal(|ui| {
                 ui.add_space(mode_pad);
                 let content = ui.horizontal(|ui| {
-                    if ui.button("Tela Inteira").clicked() {
+                    if ui.button(strings.full_screen_button).clicked() {
                         action = Some(ProjectAction::StartFullScreen);
                     }
-                    if ui.button("Selecionar Área").clicked() {
+                    if ui.button(strings.select_area_button).clicked() {
                         action = Some(ProjectAction::StartAreaSelection);
                     }
                 });

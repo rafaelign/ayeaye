@@ -221,17 +221,41 @@ impl eframe::App for App {
         // touch at all.
         egui::Panel::top("app_top_bar").exact_size(28.0).show(ui, |ui| {
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                if ui.selectable_label(self.lang == Lang::PtBr, "PT-BR").clicked() {
+                // Plain colored text instead of `selectable_label`'s bright
+                // filled-background look — same quiet register as the
+                // project screen's donation link: the active language is
+                // just brighter than the inactive one, no background pill.
+                let active_color = ui.visuals().text_color();
+                let muted_color = ui.visuals().weak_text_color();
+
+                let pt_br_response = ui.add(
+                    egui::Label::new(
+                        egui::RichText::new("PT-BR").size(12.0).color(if self.lang == Lang::PtBr { active_color } else { muted_color }),
+                    )
+                    .sense(egui::Sense::click()),
+                );
+                if pt_br_response.hovered() {
+                    ui.ctx().set_cursor_icon(egui::CursorIcon::PointingHand);
+                }
+                if pt_br_response.clicked() {
                     self.lang = Lang::PtBr;
                 }
-                if ui.selectable_label(self.lang == Lang::En, "EN").clicked() {
+
+                let en_response = ui.add(
+                    egui::Label::new(egui::RichText::new("EN").size(12.0).color(if self.lang == Lang::En { active_color } else { muted_color }))
+                        .sense(egui::Sense::click()),
+                );
+                if en_response.hovered() {
+                    ui.ctx().set_cursor_icon(egui::CursorIcon::PointingHand);
+                }
+                if en_response.clicked() {
                     self.lang = Lang::En;
                 }
             });
         });
 
         egui::CentralPanel::default().show(ui, |ui| match &mut self.state {
-            AppState::Project(screen) => match screen.show(ui, &logo) {
+            AppState::Project(screen) => match screen.show(ui, &logo, strings) {
                 Some(ProjectAction::StartFullScreen) => should_start_full_screen = true,
                 Some(ProjectAction::StartAreaSelection) => {
                     let fps = screen.fps;
