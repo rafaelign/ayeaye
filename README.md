@@ -89,7 +89,7 @@ cargo test --workspace
 
 **On Wayland** (run under a session where `echo $XDG_SESSION_TYPE` prints `wayland`):
 
-- [ ] Full Screen: record, confirm the OS screen-sharing picker appears and recording only starts after picking a monitor and sharing, indicator appears and counts correctly, the "Parar" button on the indicator stops it (F9 is expected to do nothing), editor shows the result.
+- [ ] Full Screen: record, confirm the OS screen-sharing picker appears and recording only starts after picking a monitor and sharing, indicator appears and counts correctly, the "Stop" button on the indicator stops it (F9 is expected to do nothing), editor shows the result.
 - [ ] Select Area: overlay fullscreens on the monitor the app window is on, dragging shows the rectangle in real time, the exported/edited frames only cover the dragged region (not the whole monitor).
 - [ ] Recording at each FPS preset (8/12/15/20) roughly matches the expected frame count for the recording's duration (allow some slack — the throttle drops frames, it doesn't guarantee an exact count).
 
