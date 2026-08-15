@@ -3,13 +3,13 @@
 </p>
 
 <h1 align="center">AyeAye</h1>
-<p align="center">Screen recorder + GIF editor for Linux (X11), written in Rust.</p>
+<p align="center">Screen recorder + GIF editor for Linux (X11/Wayland), written in Rust.</p>
 
 <p align="center">
   <a href="README.pt-BR.md">Português (Brasil)</a> ·
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License"></a>
   <img src="https://img.shields.io/badge/rust-stable-orange.svg" alt="Rust stable">
-  <img src="https://img.shields.io/badge/platform-Linux%20(X11)-lightgrey.svg" alt="Linux X11">
+  <img src="https://img.shields.io/badge/platform-Linux%20(X11%2FWayland)-lightgrey.svg" alt="Linux X11/Wayland">
 </p>
 
 Records a region of the screen, lets you edit the frames (delete, reorder, crop, blur, annotate with text), and exports a GIF. The name is a reference to the aye-aye, a nocturnal lemur from Madagascar.
@@ -66,7 +66,7 @@ cargo run -p app
 
 ## Scope of this version
 
-See `docs/superpowers/specs/2026-08-12-screentogif-rust-linux-design.md` (original MVP) and `docs/superpowers/specs/2026-08-13-screentogif-capture-editor-redesign-design.md` (current capture and editor flow) for the full design. Out of scope for now: Wayland, webcam, board mode, per-frame delay editing, drag-and-drop reordering in the filmstrip, choosing a specific window to record, export to video/APNG/PSD, save/load project.
+See `docs/superpowers/specs/2026-08-12-screentogif-rust-linux-design.md` (original MVP), `docs/superpowers/specs/2026-08-13-screentogif-capture-editor-redesign-design.md` (current capture and editor flow), and `docs/superpowers/specs/2026-08-15-wayland-capture-support-design.md` (Wayland support) for the full design. Out of scope for now: webcam, board mode, per-frame delay editing, drag-and-drop reordering in the filmstrip, choosing a specific window to record, export to video/APNG/PSD, save/load project, a portal-based global shortcut for F9 on Wayland.
 
 ## Automated tests
 

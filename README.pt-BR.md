@@ -3,13 +3,13 @@
 </p>
 
 <h1 align="center">AyeAye</h1>
-<p align="center">Gravador de tela + editor de GIFs para Linux (X11), escrito em Rust.</p>
+<p align="center">Gravador de tela + editor de GIFs para Linux (X11/Wayland), escrito em Rust.</p>
 
 <p align="center">
   <a href="README.md">English</a> ·
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="Licença MIT"></a>
   <img src="https://img.shields.io/badge/rust-stable-orange.svg" alt="Rust stable">
-  <img src="https://img.shields.io/badge/platform-Linux%20(X11)-lightgrey.svg" alt="Linux X11">
+  <img src="https://img.shields.io/badge/platform-Linux%20(X11%2FWayland)-lightgrey.svg" alt="Linux X11/Wayland">
 </p>
 
 Grava uma região da tela, permite editar os frames (excluir, reordenar, cortar, borrar, anotar com texto) e exporta um GIF. O nome é uma referência ao aye-aye, um lêmure noturno de Madagascar.
@@ -66,7 +66,7 @@ cargo run -p app
 
 ## Escopo desta versão
 
-Ver `docs/superpowers/specs/2026-08-12-screentogif-rust-linux-design.md` (MVP original) e `docs/superpowers/specs/2026-08-13-screentogif-capture-editor-redesign-design.md` (fluxo de captura e editor atuais) para o design completo. Fora de escopo por enquanto: Wayland, webcam, modo board, edição de atraso por frame, reordenar por arrastar-e-soltar na filmstrip, escolher uma janela específica para gravar, exportação para vídeo/APNG/PSD, salvar/carregar projeto.
+Ver `docs/superpowers/specs/2026-08-12-screentogif-rust-linux-design.md` (MVP original), `docs/superpowers/specs/2026-08-13-screentogif-capture-editor-redesign-design.md` (fluxo de captura e editor atuais) e `docs/superpowers/specs/2026-08-15-wayland-capture-support-design.md` (suporte a Wayland) para o design completo. Fora de escopo por enquanto: webcam, modo board, edição de atraso por frame, reordenar por arrastar-e-soltar na filmstrip, escolher uma janela específica para gravar, exportação para vídeo/APNG/PSD, salvar/carregar projeto, um atalho global via portal para o F9 no Wayland.
 
 ## Testes automatizados
 
