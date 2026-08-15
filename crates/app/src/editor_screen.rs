@@ -2,6 +2,8 @@ use eframe::egui;
 use editor::FrameList;
 use image::RgbaImage;
 
+use crate::strings::Strings;
+
 #[derive(Clone, Copy, PartialEq)]
 pub enum Tool {
     Selecionar,
@@ -91,7 +93,7 @@ impl EditorScreen {
     /// the preview is a real, stable number instead of a value that
     /// depends on the preview's own content (which previously collapsed to
     /// the frame's tiny native pixel size).
-    pub fn show(&mut self, ui: &mut egui::Ui, frames: &FrameList) -> Option<EditorAction> {
+    pub fn show(&mut self, ui: &mut egui::Ui, frames: &FrameList, strings: &Strings) -> Option<EditorAction> {
         let mut action = None;
 
         // Status bar: claimed first among the bottom panels, so it ends up
@@ -100,10 +102,10 @@ impl EditorScreen {
         egui::Panel::bottom("editor_status_bar").exact_size(28.0).show(ui, |ui| {
             ui.horizontal(|ui| {
                 let hint = match self.tool {
-                    Tool::Selecionar => format!("Frame {} de {}", self.selected + 1, frames.len()),
-                    Tool::Recortar => "Arraste sobre o preview para recortar.".to_string(),
-                    Tool::Blur => "Arraste sobre o preview para borrar.".to_string(),
-                    Tool::Texto => "Clique no preview para posicionar o texto.".to_string(),
+                    Tool::Selecionar => strings.frame_x_of_n(self.selected + 1, frames.len()),
+                    Tool::Recortar => strings.hint_crop.to_string(),
+                    Tool::Blur => strings.hint_blur.to_string(),
+                    Tool::Texto => strings.hint_text.to_string(),
                 };
                 ui.label(hint);
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
@@ -145,45 +147,45 @@ impl EditorScreen {
         egui::Panel::top("editor_toolbar").exact_size(self.toolbar_height).show(ui, |ui| {
             ui.add_space(4.0);
             let content = ui.horizontal_wrapped(|ui| {
-                if ui.button(if self.playing { "Pausar" } else { "Reproduzir" }).clicked() {
+                if ui.button(if self.playing { strings.pause_button } else { strings.play_button }).clicked() {
                     self.playing = !self.playing;
                     self.play_started_at = if self.playing { Some(std::time::Instant::now()) } else { None };
                 }
                 ui.separator();
-                if ui.selectable_label(self.tool == Tool::Selecionar, "Selecionar").clicked() {
+                if ui.selectable_label(self.tool == Tool::Selecionar, strings.tool_select).clicked() {
                     self.tool = Tool::Selecionar;
                 }
-                if ui.selectable_label(self.tool == Tool::Recortar, "Recortar").clicked() {
+                if ui.selectable_label(self.tool == Tool::Recortar, strings.tool_crop).clicked() {
                     self.tool = Tool::Recortar;
                     self.crop_drag_start = None;
                 }
-                if ui.selectable_label(self.tool == Tool::Blur, "Blur").clicked() {
+                if ui.selectable_label(self.tool == Tool::Blur, strings.tool_blur).clicked() {
                     self.tool = Tool::Blur;
                     self.blur_drag_start = None;
                 }
-                if ui.selectable_label(self.tool == Tool::Texto, "Texto").clicked() {
+                if ui.selectable_label(self.tool == Tool::Texto, strings.tool_text).clicked() {
                     self.tool = Tool::Texto;
                 }
                 ui.separator();
 
                 match self.tool {
                     Tool::Selecionar => {
-                        if ui.button("Duplicar").clicked() {
+                        if ui.button(strings.duplicate_button).clicked() {
                             action = Some(EditorAction::Duplicate(self.selected));
                         }
-                        if ui.add_enabled(self.selected > 0, egui::Button::new("< Mover")).clicked() {
+                        if ui.add_enabled(self.selected > 0, egui::Button::new(strings.move_left_button)).clicked() {
                             action = Some(EditorAction::Reorder(self.selected, self.selected - 1));
                         }
-                        if ui.add_enabled(self.selected + 1 < frames.len(), egui::Button::new("Mover >")).clicked() {
+                        if ui.add_enabled(self.selected + 1 < frames.len(), egui::Button::new(strings.move_right_button)).clicked() {
                             action = Some(EditorAction::Reorder(self.selected, self.selected + 1));
                         }
-                        if ui.add_enabled(!frames.is_empty(), egui::Button::new("Excluir frame")).clicked() {
+                        if ui.add_enabled(!frames.is_empty(), egui::Button::new(strings.delete_frame_button)).clicked() {
                             action = Some(EditorAction::Delete(self.selected));
                         }
                     }
                     Tool::Recortar => {}
                     Tool::Blur => {
-                        ui.add(egui::Slider::new(&mut self.blur_sigma, 1.0..=20.0).text("Intensidade"));
+                        ui.add(egui::Slider::new(&mut self.blur_sigma, 1.0..=20.0).text(strings.intensity_label));
                     }
                     Tool::Texto => {
                         ui.text_edit_singleline(&mut self.text_input);

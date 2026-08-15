@@ -75,6 +75,7 @@ fn show_editing_body(
     frames: &FrameList,
     screen: &mut EditorScreen,
     logo: &egui::TextureHandle,
+    strings: &Strings,
     last_error: &Option<String>,
     should_return_to_project: &mut bool,
     should_start_export: &mut Option<PathBuf>,
@@ -83,7 +84,7 @@ fn show_editing_body(
         ui.add(egui::Image::new(logo).fit_to_exact_size(egui::vec2(22.0, 22.0)));
         ui.heading("AyeAye");
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-            if ui.button("Exportar").clicked() {
+            if ui.button(strings.export_button).clicked() {
                 if let Some(path) =
                     rfd::FileDialog::new().add_filter("GIF", &["gif"]).set_file_name("recording.gif").save_file()
                 {
@@ -94,14 +95,14 @@ fn show_editing_body(
     });
     // Frame count now lives in the editor's own status bar (see
     // EditorScreen::show) rather than being duplicated up here.
-    if ui.link("< Nova gravação").clicked() {
+    if ui.link(strings.new_recording_link).clicked() {
         *should_return_to_project = true;
     }
     if let Some(msg) = last_error {
         ui.colored_label(egui::Color32::RED, msg);
     }
     ui.separator();
-    screen.show(ui, frames)
+    screen.show(ui, frames, strings)
 }
 
 struct App {
@@ -334,6 +335,7 @@ impl eframe::App for App {
                     frames,
                     screen,
                     &logo,
+                    strings,
                     &self.last_error,
                     &mut should_return_to_project,
                     &mut should_start_export,
@@ -375,6 +377,7 @@ impl eframe::App for App {
                         frames,
                         screen,
                         &logo,
+                        strings,
                         &self.last_error,
                         &mut should_return_to_project,
                         &mut should_start_export,
