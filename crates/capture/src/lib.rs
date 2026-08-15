@@ -31,6 +31,30 @@ impl std::fmt::Display for CaptureError {
 
 impl std::error::Error for CaptureError {}
 
+/// Which display server the current desktop session is running. Detected
+/// once, via `XDG_SESSION_TYPE` — the same variable the README already
+/// tells users to check. `capture::start_capture` is the only place that
+/// branches on this; every other component works the same way regardless
+/// of which loop actually produced the frames.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SessionType {
+    X11,
+    Wayland,
+}
+
+fn session_type_from_env(value: Option<&str>) -> SessionType {
+    match value {
+        Some("wayland") => SessionType::Wayland,
+        _ => SessionType::X11,
+    }
+}
+
+/// Detects the current session type. Anything other than exactly
+/// `"wayland"` (including the variable being unset) is treated as X11.
+pub fn session_type() -> SessionType {
+    session_type_from_env(std::env::var("XDG_SESSION_TYPE").ok().as_deref())
+}
+
 /// Spawns a background thread that repeatedly captures `region` at roughly
 /// `fps` frames per second, sending each captured frame on `tx`, until
 /// `stop_flag` is set to `true`. Frames already sent before a capture
@@ -172,5 +196,25 @@ mod tests {
     fn bounding_box_of_empty_slice_is_zero_sized() {
         let bounds = bounding_box(&[]);
         assert_eq!((bounds.x, bounds.y, bounds.width, bounds.height), (0, 0, 0, 0));
+    }
+
+    #[test]
+    fn session_type_from_env_wayland_is_wayland() {
+        assert_eq!(session_type_from_env(Some("wayland")), SessionType::Wayland);
+    }
+
+    #[test]
+    fn session_type_from_env_x11_is_x11() {
+        assert_eq!(session_type_from_env(Some("x11")), SessionType::X11);
+    }
+
+    #[test]
+    fn session_type_from_env_missing_defaults_to_x11() {
+        assert_eq!(session_type_from_env(None), SessionType::X11);
+    }
+
+    #[test]
+    fn session_type_from_env_unknown_value_defaults_to_x11() {
+        assert_eq!(session_type_from_env(Some("mir")), SessionType::X11);
     }
 }
