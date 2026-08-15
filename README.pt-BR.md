@@ -17,6 +17,17 @@ Grava uma região da tela, permite editar os frames (excluir, reordenar, cortar,
 > [!NOTE]
 > Inspirado no [ScreenToGif](https://github.com/NickeManarin/ScreenToGif) — este projeto é uma reescrita independente em Rust, focada em Linux/X11, sem afiliação com o projeto original.
 
+## Capturas de tela
+
+<p align="center">
+  <img src="docs/assets/screenshot_project.png" alt="Tela de gravação" width="420" /><br/>
+  <sub>Tela de gravação — escolha o FPS e inicie a gravação da tela inteira ou de uma área.</sub>
+</p>
+<p align="center">
+  <img src="docs/assets/screenshot_editor.png" alt="Tela do editor" width="420" /><br/>
+  <sub>Editor — barra de ferramentas acima do preview, com filmstrip e barra de status abaixo.</sub>
+</p>
+
 ## Requisitos
 
 - Linux com sessão X11 (rode `echo $XDG_SESSION_TYPE` para confirmar — deve imprimir `x11`).
@@ -39,15 +50,15 @@ cargo run -p app
 1. Na tela "Gravar tela", escolha o FPS (8/12/15/20) e clique em **Tela Inteira** ou **Selecionar Área**.
    - **Tela Inteira**: grava o monitor onde a janela do app está.
    - **Selecionar Área**: a tela escurece — arraste um retângulo sobre a região desejada; ao soltar, a gravação começa.
-2. Durante a gravação, um indicador flutuante mostra `● REC · MM:SS · N frames`. Clique no botão de parar do indicador, ou pressione **F9**, a qualquer momento.
+2. Durante a gravação, um indicador flutuante mostra `REC · MM:SS · N frames`. Clique no botão de parar do indicador, ou pressione **F9**, a qualquer momento.
 3. A janela principal volta ao primeiro plano com uma tela de carregamento ("Processando gravação...") enquanto as miniaturas são preparadas em segundo plano, e então mostra o editor.
-4. No editor: a miniatura selecionada aparece grande à esquerda; a filmstrip embaixo lista todos os frames (clique para selecionar). No painel à direita, escolha a ferramenta:
-   - **Selecionar**: Duplicar, mover (◀/▶), excluir o frame atual.
+4. No editor: a barra de ferramentas acima do preview traz as ferramentas de edição, o preview fica centralizado abaixo dela, e a filmstrip lista todos os frames (clique para selecionar) acima de uma barra de status. Escolha uma ferramenta na barra:
+   - **Selecionar**: Duplicar, mover (`<`/`>`), excluir o frame atual.
    - **Recortar**: arraste sobre o preview para cortar todos os frames.
    - **Blur**: ajuste a intensidade, arraste sobre o preview para borrar uma região em todos os frames.
    - **Texto**: digite o texto, clique no preview para posicioná-lo em todos os frames.
-   - **▷ Prévia** reproduz os frames em loop no preview.
-5. Clique em **Exportar**, escolha onde salvar. O editor continua visível (desabilitado) com um indicador de progresso sobreposto; ele libera automaticamente e mostra "Salvo em: ..." quando terminar. "← Nova gravação" descarta a sessão atual e volta à tela inicial.
+   - **Reproduzir/Pausar** reproduz os frames em loop no preview.
+5. Clique em **Exportar**, escolha onde salvar. O editor continua visível (desabilitado) com um indicador de progresso sobreposto; ele libera automaticamente e mostra "Salvo em: ..." quando terminar. "< Nova gravação" descarta a sessão atual e volta à tela inicial.
 
 ## Escopo desta versão
 
