@@ -1,5 +1,7 @@
 use eframe::egui;
 
+use crate::theme;
+
 pub enum ProjectAction {
     StartFullScreen,
     StartAreaSelection,
@@ -33,18 +35,21 @@ impl ProjectScreen {
         let box_width = (ui.available_width() * 0.65).clamp(280.0, 900.0);
         let box_height = (box_width * 9.0 / 16.0).clamp(160.0, 560.0);
         let heading_size = (ui.available_width() / 25.0).clamp(28.0, 56.0);
-        let logo_size = (heading_size * 1.8).clamp(48.0, 96.0);
+        let logo_size = (heading_size * 2.4).clamp(64.0, 128.0);
+        let name_size = (heading_size * 0.6).clamp(18.0, 26.0);
 
         // vertical_centered only centers each widget horizontally — without
         // this top padding the whole block stays pinned to the top on a
         // large window, with a huge empty gap below it.
         let estimated_content_height =
-            logo_size + 12.0 + heading_size * 1.5 + 24.0 + 16.0 * 3.0 + box_height + 40.0 + 32.0;
+            logo_size + 2.0 + name_size * 1.3 + 12.0 + heading_size * 1.5 + 24.0 + 16.0 * 3.0 + box_height + 40.0 + 32.0;
         let top_padding = ((ui.available_height() - estimated_content_height) / 2.0).max(0.0);
 
         ui.vertical_centered(|ui| {
             ui.add_space(top_padding);
             ui.add(egui::Image::new(logo).fit_to_exact_size(egui::vec2(logo_size, logo_size)));
+            ui.add_space(2.0);
+            ui.label(egui::RichText::new("AyeAye").size(name_size).strong().color(theme::ACCENT));
             ui.add_space(12.0);
             ui.label(egui::RichText::new("Gravar tela").size(heading_size).color(ui.visuals().text_color()));
             ui.label("Escolha a taxa de quadros e grave sua tela ou uma área selecionada.");
