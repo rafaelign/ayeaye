@@ -85,6 +85,7 @@ cargo test --workspace
 - [ ] Selecionar Área: overlay cobre a tela, arrasto mostra o retângulo em tempo real, gravação começa só na área escolhida.
 - [ ] No editor: exercite Selecionar (duplicar/mover/excluir), Recortar, Blur, Texto e Prévia, nessa ordem, sobre a mesma gravação.
 - [ ] Exportar e abrir o GIF resultante — confirme que ele reflete todas as edições (frame duplicado, corte, blur, texto, ordem).
+- [ ] Seletor de idioma: alterne entre EN e PT-BR na barra superior e confirme que o texto de todas as telas muda nas duas direções (tela de gravação, indicador de gravação, barra de ferramentas/status do editor, rótulos de processamento/exportação/concluído).
 
 **No Wayland** (rode numa sessão onde `echo $XDG_SESSION_TYPE` imprime `wayland`):
 

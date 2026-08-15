@@ -36,7 +36,7 @@ Records a region of the screen, lets you edit the frames (delete, reorder, crop,
 - `libpipewire-0.3-dev` and `clang` installed — needed to build (`xcap`'s Wayland support pulls in PipeWire bindings unconditionally on Linux, even if you end up running on X11).
 
 > [!NOTE]
-> On Wayland, starting a recording opens the OS's screen-sharing picker (pick a monitor, click Share) — this is a security boundary of the Wayland `ScreenCast` portal, not something AyeAye can skip. The **F9** stop shortcut only works on X11; on Wayland, use the "Parar" button on the floating recording indicator. "Selecionar Área" on Wayland is limited to the monitor the app window is on.
+> On Wayland, starting a recording opens the OS's screen-sharing picker (pick a monitor, click Share) — this is a security boundary of the Wayland `ScreenCast` portal, not something AyeAye can skip. The **F9** stop shortcut only works on X11; on Wayland, use the "Stop" button on the floating recording indicator. "Select Area" on Wayland is limited to the monitor the app window is on.
 
 ## Build
 
@@ -85,6 +85,7 @@ cargo test --workspace
 - [ ] Select Area: overlay covers the screen, dragging shows the rectangle in real time, recording starts only in the chosen area.
 - [ ] In the editor: exercise Select (duplicate/move/delete), Crop, Blur, Text, and Preview, in that order, on the same recording.
 - [ ] Export and open the resulting GIF — confirm it reflects all edits (duplicated frame, crop, blur, text, order).
+- [ ] Language toggle: switch between EN and PT-BR in the top bar and confirm every screen's text changes in both directions (project screen, recording indicator, editor toolbar/status bar, processing/exporting/done labels).
 
 **On Wayland** (run under a session where `echo $XDG_SESSION_TYPE` prints `wayland`):
 
