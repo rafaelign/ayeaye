@@ -5,6 +5,7 @@ mod processing;
 mod project_screen;
 mod recording_indicator;
 mod selection_overlay;
+mod strings;
 mod text_tool;
 mod theme;
 
