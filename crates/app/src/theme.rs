@@ -1,20 +1,22 @@
 use eframe::egui;
 
-/// Accent used for selection, hover outlines, and primary actions —
-/// a warm amber, like the eyeshine of a nocturnal aye-aye.
-pub const ACCENT: egui::Color32 = egui::Color32::from_rgb(232, 163, 61);
+/// Accent used for selection, hover outlines, and primary actions — the
+/// same burnt-orange terracotta as the app icon's ears and eyes.
+pub const ACCENT: egui::Color32 = egui::Color32::from_rgb(200, 88, 32);
 
-/// Applies AyeAye's visual identity once, at startup: a warm near-black
-/// surface (rather than egui's default neutral gray), one amber accent for
-/// anything selected/primary, and generous rounded corners and padding so
-/// buttons read as tappable, friendly surfaces instead of flat rectangles.
+/// Applies AyeAye's visual identity once, at startup, sampled from the app
+/// icon: a warm charcoal-taupe surface (rather than egui's default neutral
+/// gray) with a terracotta accent for anything selected/primary, and
+/// generous rounded corners and padding so buttons read as tappable,
+/// friendly surfaces instead of flat rectangles. Kept lighter than a true
+/// near-black so the icon's dark linework still shows up against it.
 pub fn apply(ctx: &egui::Context) {
-    let bg = egui::Color32::from_rgb(20, 18, 15);
-    let surface = egui::Color32::from_rgb(33, 29, 23);
-    let surface_hover = egui::Color32::from_rgb(44, 38, 29);
-    let accent_active = egui::Color32::from_rgb(201, 138, 46);
-    let text = egui::Color32::from_rgb(242, 237, 228);
-    let text_muted = egui::Color32::from_rgb(167, 158, 142);
+    let bg = egui::Color32::from_rgb(46, 41, 34);
+    let surface = egui::Color32::from_rgb(58, 51, 42);
+    let surface_hover = egui::Color32::from_rgb(72, 63, 51);
+    let accent_active = egui::Color32::from_rgb(168, 70, 24);
+    let text = egui::Color32::from_rgb(248, 244, 236);
+    let text_muted = egui::Color32::from_rgb(196, 184, 166);
     let corner_radius: egui::CornerRadius = 10.into();
 
     ctx.all_styles_mut(|style| {
@@ -22,7 +24,7 @@ pub fn apply(ctx: &egui::Context) {
         visuals.dark_mode = true;
         visuals.panel_fill = bg;
         visuals.window_fill = bg;
-        visuals.extreme_bg_color = egui::Color32::from_rgb(14, 12, 10);
+        visuals.extreme_bg_color = egui::Color32::from_rgb(28, 25, 20);
         visuals.faint_bg_color = surface;
         visuals.weak_text_color = Some(text_muted);
         visuals.hyperlink_color = ACCENT;

@@ -22,7 +22,7 @@ impl Default for ProjectScreen {
 impl ProjectScreen {
     const FPS_PRESETS: [u32; 4] = [8, 12, 15, 20];
 
-    pub fn show(&mut self, ui: &mut egui::Ui) -> Option<ProjectAction> {
+    pub fn show(&mut self, ui: &mut egui::Ui, logo: &egui::TextureHandle) -> Option<ProjectAction> {
         let mut action = None;
 
         // The placeholder box scales with the window (65% of the available
@@ -33,15 +33,19 @@ impl ProjectScreen {
         let box_width = (ui.available_width() * 0.65).clamp(280.0, 900.0);
         let box_height = (box_width * 9.0 / 16.0).clamp(160.0, 560.0);
         let heading_size = (ui.available_width() / 25.0).clamp(28.0, 56.0);
+        let logo_size = (heading_size * 1.8).clamp(48.0, 96.0);
 
         // vertical_centered only centers each widget horizontally — without
         // this top padding the whole block stays pinned to the top on a
         // large window, with a huge empty gap below it.
-        let estimated_content_height = heading_size * 1.5 + 24.0 + 16.0 * 3.0 + box_height + 40.0 + 32.0;
+        let estimated_content_height =
+            logo_size + 12.0 + heading_size * 1.5 + 24.0 + 16.0 * 3.0 + box_height + 40.0 + 32.0;
         let top_padding = ((ui.available_height() - estimated_content_height) / 2.0).max(0.0);
 
         ui.vertical_centered(|ui| {
             ui.add_space(top_padding);
+            ui.add(egui::Image::new(logo).fit_to_exact_size(egui::vec2(logo_size, logo_size)));
+            ui.add_space(12.0);
             ui.label(egui::RichText::new("Gravar tela").size(heading_size).color(ui.visuals().text_color()));
             ui.label("Escolha a taxa de quadros e grave sua tela ou uma área selecionada.");
             ui.add_space(16.0);

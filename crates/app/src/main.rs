@@ -71,11 +71,13 @@ fn show_editing_body(
     ui: &mut egui::Ui,
     frames: &FrameList,
     screen: &mut EditorScreen,
+    logo: &egui::TextureHandle,
     last_error: &Option<String>,
     should_return_to_project: &mut bool,
     should_start_export: &mut Option<PathBuf>,
 ) -> Option<EditorAction> {
     ui.horizontal(|ui| {
+        ui.add(egui::Image::new(logo).fit_to_exact_size(egui::vec2(22.0, 22.0)));
         ui.heading("AyeAye");
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
             if ui.button("Exportar").clicked() {
@@ -108,10 +110,14 @@ struct App {
     /// whatever work was already done. Cleared when the user starts a new
     /// attempt.
     last_error: Option<String>,
+    /// The app icon, uploaded once at startup and reused everywhere it's
+    /// shown in the UI (project screen header, editor top bar) — cheap to
+    /// clone, since `TextureHandle` is just a ref-counted handle.
+    logo: egui::TextureHandle,
 }
 
-impl Default for App {
-    fn default() -> Self {
+impl App {
+    fn new(logo: egui::TextureHandle) -> Self {
         let manager = GlobalHotKeyManager::new().expect("failed to create global hotkey manager");
         let toggle_hotkey = HotKey::new(None, Code::F9);
         manager
@@ -122,6 +128,7 @@ impl Default for App {
             toggle_hotkey,
             state: AppState::Project(ProjectScreen::default()),
             last_error: None,
+            logo,
         }
     }
 }
@@ -185,9 +192,10 @@ impl eframe::App for App {
         let mut should_start_region_recording: Option<(capture::Region, u32)> = None;
         let mut should_return_to_project = false;
         let mut should_process_edit: Option<EditOp> = None;
+        let logo = self.logo.clone();
 
         egui::CentralPanel::default().show(ui, |ui| match &mut self.state {
-            AppState::Project(screen) => match screen.show(ui) {
+            AppState::Project(screen) => match screen.show(ui, &logo) {
                 Some(ProjectAction::StartFullScreen) => should_start_full_screen = true,
                 Some(ProjectAction::StartAreaSelection) => {
                     let fps = screen.fps;
@@ -243,8 +251,15 @@ impl eframe::App for App {
                 });
             }
             AppState::Editing { frames, screen } => {
-                let action =
-                    show_editing_body(ui, frames, screen, &self.last_error, &mut should_return_to_project, &mut should_start_export);
+                let action = show_editing_body(
+                    ui,
+                    frames,
+                    screen,
+                    &logo,
+                    &self.last_error,
+                    &mut should_return_to_project,
+                    &mut should_start_export,
+                );
                 if let Some(action) = action {
                     match action {
                         EditorAction::Delete(i) => {
@@ -281,6 +296,7 @@ impl eframe::App for App {
                         ui,
                         frames,
                         screen,
+                        &logo,
                         &self.last_error,
                         &mut should_return_to_project,
                         &mut should_start_export,
@@ -392,6 +408,19 @@ impl eframe::App for App {
     }
 }
 
+/// Decodes the bundled app icon (embedded at compile time, so the binary
+/// stays self-contained) into raw RGBA pixels.
+fn load_logo_image() -> image::RgbaImage {
+    let bytes = include_bytes!("../assets/icon/window_icon_256.png");
+    image::load_from_memory(bytes).expect("bundled app icon is a valid PNG").into_rgba8()
+}
+
+fn load_icon_data() -> egui::IconData {
+    let image = load_logo_image();
+    let (width, height) = image.dimensions();
+    egui::IconData { rgba: image.into_raw(), width, height }
+}
+
 fn main() -> eframe::Result<()> {
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
@@ -399,7 +428,8 @@ fn main() -> eframe::Result<()> {
             .with_resizable(true)
             .with_transparent(false)
             // 30% larger than the original 480x420 default.
-            .with_inner_size([624.0, 546.0]),
+            .with_inner_size([624.0, 546.0])
+            .with_icon(load_icon_data()),
         renderer: eframe::Renderer::Glow,
         ..Default::default()
     };
@@ -409,7 +439,13 @@ fn main() -> eframe::Result<()> {
         options,
         Box::new(|cc| {
             theme::apply(&cc.egui_ctx);
-            Ok(Box::new(App::default()))
+            let logo_image = load_logo_image();
+            let color_image = egui::ColorImage::from_rgba_unmultiplied(
+                [logo_image.width() as usize, logo_image.height() as usize],
+                logo_image.as_raw(),
+            );
+            let logo = cc.egui_ctx.load_texture("app-logo", color_image, egui::TextureOptions::default());
+            Ok(Box::new(App::new(logo)))
         }),
     )
 }
