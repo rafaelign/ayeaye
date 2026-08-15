@@ -257,6 +257,16 @@ pub fn snapshot_monitors() -> Result<Vec<(Region, RgbaImage)>, CaptureError> {
         .collect()
 }
 
+/// Captures a single still image of the monitor containing `region`'s
+/// origin point. Used as the selection-overlay backdrop on Wayland, where
+/// the overlay only ever covers one monitor (the one the app window is
+/// on) instead of the whole virtual desktop like on X11 — see
+/// `snapshot_monitors` for the X11 equivalent.
+pub fn snapshot_monitor(region: Region) -> Result<RgbaImage, CaptureError> {
+    let monitor = xcap::Monitor::from_point(region.x, region.y).map_err(|e| CaptureError::MonitorNotFound(e.to_string()))?;
+    monitor.capture_image().map_err(|e| CaptureError::CaptureFailed(e.to_string()))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
