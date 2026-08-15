@@ -72,42 +72,120 @@ fn should_accept(last_accepted: Option<Instant>, now: Instant, interval: Duratio
 /// `fps` frames per second, sending each captured frame on `tx`, until
 /// `stop_flag` is set to `true`. Frames already sent before a capture
 /// failure or a stop request remain in the channel — the caller does not
-/// lose work already produced.
+/// lose work already produced. Dispatches to the X11 or Wayland capture
+/// loop based on `session_type()` — this is the only place in the codebase
+/// that branches on session type for capture purposes.
 pub fn start_capture(
     region: Region,
     fps: u32,
     tx: Sender<Frame>,
     stop_flag: Arc<AtomicBool>,
 ) -> thread::JoinHandle<Result<(), CaptureError>> {
-    thread::spawn(move || {
-        let monitor = xcap::Monitor::from_point(region.x, region.y)
-            .map_err(|e| CaptureError::MonitorNotFound(e.to_string()))?;
-        // capture_region takes coordinates local to the monitor's own origin
-        // (it only accepts u32, so it cannot represent the global desktop
-        // coordinates a monitor left of/above the primary one would have).
-        let monitor_x = monitor.x().map_err(|e| CaptureError::MonitorNotFound(e.to_string()))?;
-        let monitor_y = monitor.y().map_err(|e| CaptureError::MonitorNotFound(e.to_string()))?;
-        let local_x = (region.x - monitor_x).max(0) as u32;
-        let local_y = (region.y - monitor_y).max(0) as u32;
-        let interval = Duration::from_millis(1000 / fps.max(1) as u64);
-        let start = Instant::now();
-
-        while !stop_flag.load(Ordering::Relaxed) {
-            let loop_start = Instant::now();
-            let image = monitor
-                .capture_region(local_x, local_y, region.width, region.height)
-                .map_err(|e| CaptureError::CaptureFailed(e.to_string()))?;
-            let timestamp_ms = start.elapsed().as_millis() as u64;
-            if tx.send(Frame { image, timestamp_ms }).is_err() {
-                break; // receiver dropped, nothing more to do
-            }
-            let elapsed = loop_start.elapsed();
-            if elapsed < interval {
-                thread::sleep(interval - elapsed);
-            }
-        }
-        Ok(())
+    thread::spawn(move || match session_type() {
+        SessionType::X11 => start_capture_x11(region, fps, tx, stop_flag),
+        SessionType::Wayland => start_capture_wayland(region, fps, tx, stop_flag),
     })
+}
+
+fn start_capture_x11(region: Region, fps: u32, tx: Sender<Frame>, stop_flag: Arc<AtomicBool>) -> Result<(), CaptureError> {
+    let monitor = xcap::Monitor::from_point(region.x, region.y)
+        .map_err(|e| CaptureError::MonitorNotFound(e.to_string()))?;
+    // capture_region takes coordinates local to the monitor's own origin
+    // (it only accepts u32, so it cannot represent the global desktop
+    // coordinates a monitor left of/above the primary one would have).
+    let monitor_x = monitor.x().map_err(|e| CaptureError::MonitorNotFound(e.to_string()))?;
+    let monitor_y = monitor.y().map_err(|e| CaptureError::MonitorNotFound(e.to_string()))?;
+    let local_x = (region.x - monitor_x).max(0) as u32;
+    let local_y = (region.y - monitor_y).max(0) as u32;
+    let interval = Duration::from_millis(1000 / fps.max(1) as u64);
+    let start = Instant::now();
+
+    while !stop_flag.load(Ordering::Relaxed) {
+        let loop_start = Instant::now();
+        let image = monitor
+            .capture_region(local_x, local_y, region.width, region.height)
+            .map_err(|e| CaptureError::CaptureFailed(e.to_string()))?;
+        let timestamp_ms = start.elapsed().as_millis() as u64;
+        if tx.send(Frame { image, timestamp_ms }).is_err() {
+            break; // receiver dropped, nothing more to do
+        }
+        let elapsed = loop_start.elapsed();
+        if elapsed < interval {
+            thread::sleep(interval - elapsed);
+        }
+    }
+    Ok(())
+}
+
+/// Wayland has no equivalent of X11's cheap, silent `capture_region` — the
+/// only continuous-capture primitive is `Monitor::video_recorder()`, which
+/// opens an `xdg-desktop-portal` `ScreenCast` session (the user picks a
+/// monitor and clicks Share in an OS dialog) and streams frames over
+/// PipeWire at whatever rate the compositor negotiates. This loop throttles
+/// those frames down to `fps` via `should_accept`, and — since the portal
+/// only offers whole-monitor sources — crops each accepted frame down to
+/// `region` client-side when the caller asked for less than the full
+/// monitor (i.e. "Selecionar Área" rather than "Tela Inteira").
+fn start_capture_wayland(region: Region, fps: u32, tx: Sender<Frame>, stop_flag: Arc<AtomicBool>) -> Result<(), CaptureError> {
+    let monitor = xcap::Monitor::from_point(region.x, region.y)
+        .map_err(|e| CaptureError::MonitorNotFound(e.to_string()))?;
+    let monitor_x = monitor.x().map_err(|e| CaptureError::MonitorNotFound(e.to_string()))?;
+    let monitor_y = monitor.y().map_err(|e| CaptureError::MonitorNotFound(e.to_string()))?;
+    let monitor_width = monitor.width().map_err(|e| CaptureError::MonitorNotFound(e.to_string()))?;
+    let monitor_height = monitor.height().map_err(|e| CaptureError::MonitorNotFound(e.to_string()))?;
+    let local_x = (region.x - monitor_x).max(0) as u32;
+    let local_y = (region.y - monitor_y).max(0) as u32;
+    let is_full_monitor = local_x == 0 && local_y == 0 && region.width >= monitor_width && region.height >= monitor_height;
+
+    // This is where the OS's "Share your screen" picker dialog appears —
+    // the user selects a monitor and clicks Share before frames start
+    // flowing on `rx`.
+    let (recorder, rx) = monitor.video_recorder().map_err(|e| CaptureError::CaptureFailed(e.to_string()))?;
+    recorder.start().map_err(|e| CaptureError::CaptureFailed(e.to_string()))?;
+
+    let interval = Duration::from_millis(1000 / fps.max(1) as u64);
+    let start = Instant::now();
+    let mut last_accepted: Option<Instant> = None;
+
+    while !stop_flag.load(Ordering::Relaxed) {
+        // A short timeout instead of a blocking recv keeps this loop
+        // responsive to `stop_flag` even if the compositor briefly stops
+        // sending frames (e.g. the shared monitor is asleep).
+        let raw_frame = match rx.recv_timeout(Duration::from_millis(200)) {
+            Ok(frame) => frame,
+            Err(std::sync::mpsc::RecvTimeoutError::Timeout) => continue,
+            Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => break,
+        };
+
+        let now = Instant::now();
+        if !should_accept(last_accepted, now, interval) {
+            continue;
+        }
+        last_accepted = Some(now);
+
+        let Some(image) = RgbaImage::from_raw(raw_frame.width, raw_frame.height, raw_frame.raw) else {
+            // Buffer size didn't match width*height*4 — a malformed frame
+            // from the compositor. Skip it rather than lose the recording.
+            continue;
+        };
+        let image = if is_full_monitor {
+            image
+        } else {
+            // `crop_imm` clips to the image's actual bounds rather than
+            // panicking, which matters if the buffer turns out to be in
+            // physical pixels while `local_x`/`local_y`/`region` are in
+            // logical (scaled) coordinates on a HiDPI setup.
+            image::imageops::crop_imm(&image, local_x, local_y, region.width, region.height).to_image()
+        };
+
+        let timestamp_ms = start.elapsed().as_millis() as u64;
+        if tx.send(Frame { image, timestamp_ms }).is_err() {
+            break;
+        }
+    }
+
+    let _ = recorder.stop();
+    Ok(())
 }
 
 pub fn bounding_box(monitors: &[Region]) -> Region {
