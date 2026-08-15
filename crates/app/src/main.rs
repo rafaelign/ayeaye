@@ -171,7 +171,7 @@ impl App {
                 // sent through `rx` is still collected below, so a mid-recording
                 // failure never discards frames the user already captured.
                 if let Err(e) = handle.join().expect("capture thread panicked") {
-                    self.last_error = Some(format!("A gravação parou antes do esperado: {e}"));
+                    self.last_error = Some(self.lang.strings().recording_stopped_early(e));
                 }
                 frames.extend(rx.try_iter());
                 let job = start_initial_processing(FrameList::new(frames));
@@ -319,7 +319,7 @@ impl eframe::App for App {
                     ui.vertical_centered(|ui| {
                         ui.add(egui::Spinner::new().size(32.0));
                         ui.add_space(8.0);
-                        ui.label("Processando gravação...");
+                        ui.label(strings.processing_label);
                         ui.add_space(4.0);
                         ui.add(
                             egui::ProgressBar::new(if total == 0 { 0.0 } else { current as f32 / total as f32 })
@@ -396,7 +396,7 @@ impl eframe::App for App {
                             ui.add_space(8.0);
                             ui.add(egui::Spinner::new().size(24.0));
                             ui.add_space(8.0);
-                            ui.label("Exportando...");
+                            ui.label(strings.exporting_label);
                             ui.add_space(4.0);
                             ui.add(
                                 egui::ProgressBar::new(if total == 0 { 0.0 } else { current as f32 / total as f32 })
@@ -407,7 +407,7 @@ impl eframe::App for App {
                     });
             }
             AppState::Done { output_path } => {
-                ui.label(format!("Salvo em: {}", output_path.display()));
+                ui.label(strings.saved_to(output_path));
             }
         });
 
@@ -477,7 +477,7 @@ impl eframe::App for App {
                         match job.handle.join().expect("export thread panicked") {
                             Ok(()) => AppState::Done { output_path },
                             Err(e) => {
-                                self.last_error = Some(format!("Falha ao exportar: {e}"));
+                                self.last_error = Some(strings.export_failed(e));
                                 AppState::Editing { frames, screen }
                             }
                         }
