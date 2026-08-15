@@ -102,8 +102,11 @@ fn show_editing_body(
 }
 
 struct App {
-    _hotkey_manager: GlobalHotKeyManager,
-    toggle_hotkey: HotKey,
+    /// `None` on Wayland — `global-hotkey`'s Linux backend is X11-only, so
+    /// there's nothing to hold there. The recording indicator's "Parar"
+    /// button is the only way to stop a recording on Wayland.
+    _hotkey_manager: Option<GlobalHotKeyManager>,
+    toggle_hotkey: Option<HotKey>,
     state: AppState,
     /// Set when a background operation (capture, export) fails partway
     /// through, so the current screen can show a warning without losing
@@ -118,13 +121,18 @@ struct App {
 
 impl App {
     fn new(logo: egui::TextureHandle) -> Self {
-        let manager = GlobalHotKeyManager::new().expect("failed to create global hotkey manager");
-        let toggle_hotkey = HotKey::new(None, Code::F9);
-        manager
-            .register(toggle_hotkey)
-            .expect("failed to register F9 hotkey (is another app using it?)");
+        let (hotkey_manager, toggle_hotkey) = if capture::session_type() == capture::SessionType::X11 {
+            let manager = GlobalHotKeyManager::new().expect("failed to create global hotkey manager");
+            let toggle_hotkey = HotKey::new(None, Code::F9);
+            manager
+                .register(toggle_hotkey)
+                .expect("failed to register F9 hotkey (is another app using it?)");
+            (Some(manager), Some(toggle_hotkey))
+        } else {
+            (None, None)
+        };
         Self {
-            _hotkey_manager: manager,
+            _hotkey_manager: hotkey_manager,
             toggle_hotkey,
             state: AppState::Project(ProjectScreen::default()),
             last_error: None,
@@ -170,10 +178,12 @@ impl eframe::App for App {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         let ctx = ui.ctx().clone();
 
-        if let Ok(event) = GlobalHotKeyEvent::receiver().try_recv() {
-            if event.id == self.toggle_hotkey.id() && event.state == global_hotkey::HotKeyState::Pressed {
-                if matches!(self.state, AppState::Recording { .. }) {
-                    self.stop_recording(&ctx);
+        if let Some(toggle_hotkey) = self.toggle_hotkey {
+            if let Ok(event) = GlobalHotKeyEvent::receiver().try_recv() {
+                if event.id == toggle_hotkey.id() && event.state == global_hotkey::HotKeyState::Pressed {
+                    if matches!(self.state, AppState::Recording { .. }) {
+                        self.stop_recording(&ctx);
+                    }
                 }
             }
         }
