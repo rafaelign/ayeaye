@@ -456,8 +456,10 @@ fn main() -> eframe::Result<()> {
             .with_decorations(true)
             .with_resizable(true)
             .with_transparent(false)
-            // 30% larger than the original 480x420 default.
-            .with_inner_size([624.0, 546.0])
+            // 30% larger than the original 480x420 default, plus extra
+            // height for the project screen's donation footer so it
+            // doesn't overlap the "Tela Inteira"/"Selecionar Área" buttons.
+            .with_inner_size([624.0, 596.0])
             .with_icon(load_icon_data()),
         renderer: eframe::Renderer::Glow,
         ..Default::default()
