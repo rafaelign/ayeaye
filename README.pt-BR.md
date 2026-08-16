@@ -38,7 +38,13 @@ Grava uma região da tela, permite editar os frames (excluir, reordenar, cortar,
 > [!NOTE]
 > No Wayland, iniciar uma gravação abre o seletor de compartilhamento de tela do sistema (escolher um monitor, clicar em Compartilhar) — isso é uma barreira de segurança do portal `ScreenCast` do Wayland, não algo que o AyeAye pode pular. O atalho **F9** para parar só funciona no X11; no Wayland, use o botão "Parar" no indicador flutuante de gravação. "Selecionar Área" no Wayland fica limitada ao monitor onde a janela do app está.
 
-## Build
+## Instalar
+
+Pacotes `.deb` e `.AppImage` prontos ficam anexados a cada
+[Release](https://github.com/rafaelign/ayeaye/releases) — veja
+`packaging/linux/README.md` para saber como são gerados.
+
+## Build a partir do código-fonte
 
 ```bash
 cargo build --workspace

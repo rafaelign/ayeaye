@@ -38,7 +38,13 @@ Records a region of the screen, lets you edit the frames (delete, reorder, crop,
 > [!NOTE]
 > On Wayland, starting a recording opens the OS's screen-sharing picker (pick a monitor, click Share) — this is a security boundary of the Wayland `ScreenCast` portal, not something AyeAye can skip. The **F9** stop shortcut only works on X11; on Wayland, use the "Stop" button on the floating recording indicator. "Select Area" on Wayland is limited to the monitor the app window is on.
 
-## Build
+## Install
+
+Prebuilt `.deb` and `.AppImage` packages are attached to each
+[Release](https://github.com/rafaelign/ayeaye/releases) — see
+`packaging/linux/README.md` for how they're built.
+
+## Build from source
 
 ```bash
 cargo build --workspace
