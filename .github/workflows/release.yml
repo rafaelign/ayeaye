@@ -16,10 +16,14 @@ jobs:
       - name: Install cargo-deb
         run: cargo install cargo-deb --locked
 
-      - name: Install packaging build dependencies
+      - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libpipewire-0.3-dev clang
+          sudo apt-get install -y \
+            libpipewire-0.3-dev clang file \
+            libegl1-mesa-dev libgl1-mesa-dev libgbm-dev \
+            libxkbcommon-dev libxkbcommon-x11-0 libwayland-dev \
+            libx11-dev libxext-dev libxrandr-dev libxinerama-dev libxi-dev libxcursor-dev
 
       - name: Build .deb
         run: packaging/linux/build-deb.sh
