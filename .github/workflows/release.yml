@@ -8,6 +8,11 @@ on:
 jobs:
   linux-packages:
     runs-on: ubuntu-latest
+    # softprops/action-gh-release needs write access to create the release
+    # and attach artifacts to it — the default GITHUB_TOKEN is read-only
+    # unless a workflow explicitly asks for more.
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
