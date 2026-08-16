@@ -2,6 +2,11 @@
 name = "app"
 version = "0.1.0"
 edition = "2024"
+description = "Screen recorder and GIF editor for Linux"
+license = "MIT"
+authors = ["Rafael Crispim Ignácio <rafael.nacio@gmail.com>"]
+repository = "https://github.com/rafaelign/ayeaye"
+homepage = "https://github.com/rafaelign/ayeaye"
 
 [dependencies]
 capture = { version = "0.1.0", path = "../capture" }
@@ -12,3 +17,35 @@ encoder = { version = "0.1.0", path = "../encoder" }
 global-hotkey = "0.8.0"
 image = "0.25.10"
 rfd = "0.17.2"
+
+[package.metadata.deb]
+name = "ayeaye"
+maintainer = "Rafael Crispim Ignácio <rafael.nacio@gmail.com>"
+copyright = "2026, Rafael Crispim Ignácio <rafael.nacio@gmail.com>"
+license-file = ["../../LICENSE", "4"]
+extended-description = """\
+AyeAye records a region of the screen, lets you edit the frames (delete, \
+reorder, crop, blur, annotate with text), and exports a GIF. Supports both \
+X11 and Wayland sessions."""
+section = "video"
+priority = "optional"
+# $auto covers link-time dependencies (via dpkg-shlibdeps); the rest are
+# libraries eframe/winit/glutin load via dlopen at runtime, which
+# dpkg-shlibdeps can't see because it only inspects link-time NEEDED
+# entries — confirmed by installing a $auto-only build into a clean
+# ubuntu:24.04 container and watching it fail on libXcursor.so.1 at
+# startup, then adding libraries back one at a time until it launched
+# and stayed running under xvfb-run.
+depends = "$auto, libgl1, libegl1, libxcursor1, libxi6, libxrandr2, libxinerama1, libwayland-client0, libwayland-egl1, libwayland-cursor0, libxkbcommon0, libxkbcommon-x11-0"
+assets = [
+    ["target/release/app", "usr/bin/ayeaye", "755"],
+    ["../../packaging/linux/io.github.rafaelign.AyeAye.desktop", "usr/share/applications/io.github.rafaelign.AyeAye.desktop", "644"],
+    ["../../packaging/linux/io.github.rafaelign.AyeAye.metainfo.xml", "usr/share/metainfo/io.github.rafaelign.AyeAye.metainfo.xml", "644"],
+    ["../../packaging/linux/icons/hicolor/16x16/apps/io.github.rafaelign.AyeAye.png", "usr/share/icons/hicolor/16x16/apps/io.github.rafaelign.AyeAye.png", "644"],
+    ["../../packaging/linux/icons/hicolor/32x32/apps/io.github.rafaelign.AyeAye.png", "usr/share/icons/hicolor/32x32/apps/io.github.rafaelign.AyeAye.png", "644"],
+    ["../../packaging/linux/icons/hicolor/48x48/apps/io.github.rafaelign.AyeAye.png", "usr/share/icons/hicolor/48x48/apps/io.github.rafaelign.AyeAye.png", "644"],
+    ["../../packaging/linux/icons/hicolor/64x64/apps/io.github.rafaelign.AyeAye.png", "usr/share/icons/hicolor/64x64/apps/io.github.rafaelign.AyeAye.png", "644"],
+    ["../../packaging/linux/icons/hicolor/128x128/apps/io.github.rafaelign.AyeAye.png", "usr/share/icons/hicolor/128x128/apps/io.github.rafaelign.AyeAye.png", "644"],
+    ["../../packaging/linux/icons/hicolor/256x256/apps/io.github.rafaelign.AyeAye.png", "usr/share/icons/hicolor/256x256/apps/io.github.rafaelign.AyeAye.png", "644"],
+    ["../../packaging/linux/icons/hicolor/512x512/apps/io.github.rafaelign.AyeAye.png", "usr/share/icons/hicolor/512x512/apps/io.github.rafaelign.AyeAye.png", "644"],
+]
