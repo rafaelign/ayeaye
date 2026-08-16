@@ -75,6 +75,14 @@ cargo run -p app
 
 Ver `docs/superpowers/specs/2026-08-12-screentogif-rust-linux-design.md` (MVP original), `docs/superpowers/specs/2026-08-13-screentogif-capture-editor-redesign-design.md` (fluxo de captura e editor atuais) e `docs/superpowers/specs/2026-08-15-wayland-capture-support-design.md` (suporte a Wayland) para o design completo. Fora de escopo por enquanto: webcam, modo board, edição de atraso por frame, reordenar por arrastar-e-soltar na filmstrip, escolher uma janela específica para gravar, exportação para vídeo/APNG/PSD, salvar/carregar projeto, um atalho global via portal para o F9 no Wayland.
 
+## Roadmap
+
+Planejado para versões futuras:
+
+- [ ] **Importação de vídeo** — importar um arquivo de vídeo direto no editor (importar → tela de edição), além de apenas gravações de tela.
+- [ ] **Eliminação de frames parecidos** — descartar frames quase idênticos aos vizinhos, provavelmente com apoio de IA, pra reduzir o tamanho do GIF sem perda perceptível de qualidade.
+- [ ] **Blur inteligente de dados sensíveis** — borrar dados sensíveis automaticamente, seja a partir de formatos pré-definidos ou de uma regex fornecida pelo usuário, em vez de só seleção manual de região.
+
 ## Testes automatizados
 
 ```bash
